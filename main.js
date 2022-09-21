@@ -18,11 +18,12 @@ function main() {
     attribute vec2 aPosition;
     attribute vec3 aColor;
     uniform float uTheta;
+    uniform vec2 translation;
     varying vec3 vColor;
     void main() {
         float x = -sin(uTheta) * aPosition.x + cos(uTheta) * aPosition.y;
         float y = cos(uTheta) * aPosition.x + sin(uTheta) * aPosition.y;
-        gl_Position = vec4(x, y, 0.0, 1.0);
+        gl_Position = vec4(x + translation.x, y + translation.y, 0.0, 1.0);
         vColor = aColor;
     }
     `;
@@ -51,9 +52,14 @@ function main() {
     // Variabel lokal
     var theta = 0.0;
     var freeze = false;
+    var tx = 0.0;
+    var ty = 0.0;
+    var tz = 0.0;
 
     // Variabel pointer ke GLSL
     var uTheta = gl.getUniformLocation(shaderProgram, "uTheta");
+    var translation = gl.getUniformLocation(shaderProgram, "translation");
+    gl.uniform2f(translation, tx, ty)
 
     // Kita mengajari GPU bagaimana caranya mengoleksi
     //  nilai posisi dari ARRAY_BUFFER
@@ -78,6 +84,23 @@ function main() {
     // Papan ketuk
     function onKeydown(event) {
         if (event.keyCode == 32) freeze = !freeze;
+        if (event.keyCode == 87) {
+            ty += 0.1
+
+        }
+        if (event.keyCode == 83) {
+            ty -= 0.1
+
+        }
+        if (event.keyCode == 65) {
+            tx -= 0.1
+
+        }
+        if (event.keyCode == 68) {
+            tx += 0.1
+
+        }
+        gl.uniform2f(translation, tx, ty)
     }
     function onKeyup(event) {
         if (event.keyCode == 32) freeze = !freeze;
