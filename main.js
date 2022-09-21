@@ -3,10 +3,10 @@ function main() {
     var gl = kanvas.getContext("webgl");
 
     var vertices = [
-        0.5, 0.5, 0.0, 1.0, 1.0,   // A: kanan atas    (BIRU LANGIT)
-        0.0, 0.0, 1.0, 0.0, 1.0,   // B: bawah tengah  (MAGENTA)
-        -0.5, 0.5, 1.0, 1.0, 0.0,  // C: kiri atas     (KUNING)
-        0.0, 1.0, 1.0, 1.0, 1.0    // D: atas tengah   (PUTIH)
+        0.5, 0.0, 0.0, 1.0, 1.0,   // A: kanan atas    (BIRU LANGIT)
+        0.0, -0.5, 1.0, 0.0, 1.0,   // B: bawah tengah  (MAGENTA)
+        -0.5, 0.0, 1.0, 1.0, 0.0,  // C: kiri atas     (KUNING)
+        0.0, 0.5, 1.0, 1.0, 1.0    // D: atas tengah   (PUTIH)
     ];
 
     var buffer = gl.createBuffer();
@@ -50,6 +50,7 @@ function main() {
 
     // Variabel lokal
     var theta = 0.0;
+    var freeze = false;
 
     // Variabel pointer ke GLSL
     var uTheta = gl.getUniformLocation(shaderProgram, "uTheta");
@@ -68,13 +69,22 @@ function main() {
         2 * Float32Array.BYTES_PER_ELEMENT);
     gl.enableVertexAttribArray(aColor);
 
+    // Grafika interaktif
+    function onMouseClick(event) {
+        freeze = !freeze;
+    }
+    document.addEventListener("click", onMouseClick)
+
     function render() {
 
         gl.clearColor(1.0, 0.65, 0.0, 1.0);  // Oranye
         //            Merah     Hijau   Biru    Transparansi
         gl.clear(gl.COLOR_BUFFER_BIT);
-        theta += 0.1;
-        gl.uniform1f(uTheta, theta);
+        if (!freeze) {
+            theta += 0.1;
+            gl.uniform1f(uTheta, theta);
+        }
+
         gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
         requestAnimationFrame(render);
     }
