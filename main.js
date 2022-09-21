@@ -4,7 +4,7 @@ function main() {
 
     var vertices = [
         0.5, 0.0, 0.0, 1.0, 1.0,   // A: kanan atas    (BIRU LANGIT)
-        0.0, -0.5, 1.0, 0.0, 1.0,   // B: bawah tengah  (MAGENTA)
+        0.0, -0.5, 1.0, 0.0, 1.0,  // B: bawah tengah  (MAGENTA)
         -0.5, 0.0, 1.0, 1.0, 0.0,  // C: kiri atas     (KUNING)
         0.0, 0.5, 1.0, 1.0, 1.0    // D: atas tengah   (PUTIH)
     ];
@@ -21,7 +21,7 @@ function main() {
     varying vec3 vColor;
     void main() {
         float x = -sin(uTheta) * aPosition.x + cos(uTheta) * aPosition.y;
-        float y = sin(uTheta) * aPosition.y + cos(uTheta) * aPosition.x;
+        float y = cos(uTheta) * aPosition.x + sin(uTheta) * aPosition.y;
         gl_Position = vec4(x, y, 0.0, 1.0);
         vColor = aColor;
     }
@@ -70,13 +70,22 @@ function main() {
     gl.enableVertexAttribArray(aColor);
 
     // Grafika interaktif
+    // Tetikus
     function onMouseClick(event) {
         freeze = !freeze;
     }
-    document.addEventListener("click", onMouseClick)
+    document.addEventListener("click", onMouseClick);
+    // Papan ketuk
+    function onKeydown(event) {
+        if (event.keyCode == 32) freeze = !freeze;
+    }
+    function onKeyup(event) {
+        if (event.keyCode == 32) freeze = !freeze;
+    }
+    document.addEventListener("keydown", onKeydown);
+    document.addEventListener("keyup", onKeyup);
 
     function render() {
-
         gl.clearColor(1.0, 0.65, 0.0, 1.0);  // Oranye
         //            Merah     Hijau   Biru    Transparansi
         gl.clear(gl.COLOR_BUFFER_BIT);
@@ -84,7 +93,6 @@ function main() {
             theta += 0.1;
             gl.uniform1f(uTheta, theta);
         }
-
         gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
         requestAnimationFrame(render);
     }
