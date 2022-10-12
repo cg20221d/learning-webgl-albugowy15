@@ -18,12 +18,20 @@ function main() {
     attribute vec2 aPosition;
     attribute vec3 aColor;
     uniform float uTheta;
-    uniform vec2 translation;
+    uniform vec2 uDelta;
     varying vec3 vColor;
     void main() {
-        float x = -sin(uTheta) * aPosition.x + cos(uTheta) * aPosition.y;
-        float y = cos(uTheta) * aPosition.x + sin(uTheta) * aPosition.y;
-        gl_Position = vec4(x + translation.x, y + translation.y, 0.0, 1.0);
+        //float x = -sin(uTheta) * aPosition.x + cos(uTheta) * aPosition.y;
+        //float y = cos(uTheta) * aPosition.x + sin(uTheta) * aPosition.y;
+        //gl_Position = vec4(x + uDelta.x, y + uDelta.y, 0.0, 1.0);
+
+        vec2 position = aPosition;
+        vec3 d = vec3(0.5, -0.5, 0.0);
+        mat4 translation = mat4(1.0, 0.0, 0.0, 0.0,
+                                0.0, 1.0, 0.0, 0.0,
+                                0.0, 0.0, 1.0, 0.0,
+                                d.x, d.y, d.z, 1.0);
+        gl_Position = translation * vec4(position, 0.0, 1.0);
         vColor = aColor;
     }
     `;
@@ -52,14 +60,14 @@ function main() {
     // Variabel lokal
     var theta = 0.0;
     var freeze = false;
-    var tx = 0.0;
-    var ty = 0.0;
-    var tz = 0.0;
+    var horizontalSpeed = 0.0;
+    var verticalSpeed = 0.0;
+    var horizontalDelta = 0.0;
+    var verticalDelta = 0.0;
 
     // Variabel pointer ke GLSL
     var uTheta = gl.getUniformLocation(shaderProgram, "uTheta");
-    var translation = gl.getUniformLocation(shaderProgram, "translation");
-    gl.uniform2f(translation, tx, ty)
+    var uDelta = gl.getUniformLocation(shaderProgram, "uDelta");
 
     // Kita mengajari GPU bagaimana caranya mengoleksi
     //  nilai posisi dari ARRAY_BUFFER
@@ -83,27 +91,24 @@ function main() {
     document.addEventListener("click", onMouseClick);
     // Papan ketuk
     function onKeydown(event) {
-        if (event.keyCode == 32) freeze = !freeze;
-        if (event.keyCode == 87) {
-            ty += 0.1
-
+        if (event.keyCode == 32) freeze = !freeze;  // spasi
+        // Gerakan horizontal: a ke kiri, d ke kanan
+        if (event.keyCode == 65) {  // a
+            horizontalSpeed = -0.01;
+        } else if (event.keyCode == 68) {   // d
+            horizontalSpeed = 0.01;
         }
-        if (event.keyCode == 83) {
-            ty -= 0.1
-
+        // Gerakan vertikal: w ke atas, s ke bawah
+        if (event.keyCode == 87) {  // w
+            verticalSpeed = -0.01;
+        } else if (event.keyCode == 83) {   // s
+            verticalSpeed = 0.01;
         }
-        if (event.keyCode == 65) {
-            tx -= 0.1
-
-        }
-        if (event.keyCode == 68) {
-            tx += 0.1
-
-        }
-        gl.uniform2f(translation, tx, ty)
     }
     function onKeyup(event) {
         if (event.keyCode == 32) freeze = !freeze;
+        if (event.keyCode == 65 || event.keyCode == 68) horizontalSpeed = 0.0;
+        if (event.keyCode == 87 || event.keyCode == 83) verticalSpeed = 0.0;
     }
     document.addEventListener("keydown", onKeydown);
     document.addEventListener("keyup", onKeyup);
@@ -112,10 +117,15 @@ function main() {
         gl.clearColor(1.0, 0.65, 0.0, 1.0);  // Oranye
         //            Merah     Hijau   Biru    Transparansi
         gl.clear(gl.COLOR_BUFFER_BIT);
+        /*
         if (!freeze) {
             theta += 0.1;
             gl.uniform1f(uTheta, theta);
         }
+        horizontalDelta += horizontalSpeed;
+        verticalDelta -= verticalSpeed;
+        gl.uniform2f(uDelta, horizontalDelta, verticalDelta);
+        */
         gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
         requestAnimationFrame(render);
     }
